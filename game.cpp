@@ -105,9 +105,29 @@ void Game::drawBoard(sf::RenderWindow &window) {
     // Adjustments to the outline
     const int outlineThickness = 2;
 
+    // Load the Monopoly image
+    sf::Texture monopolyTexture;
+    if (!monopolyTexture.loadFromFile("monopoly.jpg")) {
+        std::cout << "Error loading Monopoly image" << std::endl;
+        return;
+    }
+
+    // Create a sprite for the Monopoly image
+    sf::Sprite monopolyImage;
+    monopolyImage.setTexture(monopolyTexture);
+    
+    // Scale the image to fit the entire 800x800 window
+    monopolyImage.setScale(
+        static_cast<float>(windowWidth) / monopolyTexture.getSize().x,
+        static_cast<float>(windowHeight) / monopolyTexture.getSize().y
+    );
+
+    
+   
+
     // Corner tiles with larger size
     sf::RectangleShape cornerTile(sf::Vector2f(cornerTileSize, cornerTileSize));
-    cornerTile.setFillColor(sf::Color::White);
+    cornerTile.setFillColor(sf::Color::Transparent);  // Make the corners transparent to show the image underneath
     cornerTile.setOutlineColor(sf::Color::Black);
     cornerTile.setOutlineThickness(outlineThickness);
 
@@ -129,11 +149,11 @@ void Game::drawBoard(sf::RenderWindow &window) {
 
     // Regular tiles
     sf::RectangleShape verticalTile(sf::Vector2f(cornerTileSize, tileSize));
-    verticalTile.setFillColor(sf::Color::White);
+    verticalTile.setFillColor(sf::Color::Transparent);  // Tiles transparent to show the image
     verticalTile.setOutlineColor(sf::Color::Black);
     verticalTile.setOutlineThickness(outlineThickness);
 
-     // Left column (between corners)
+    // Left column (between corners)
     for (int i = 1; i < 10; ++i) {
         verticalTile.setPosition(outlineThickness, cornerTileSize + 2.5 + (i - 1) * tileSize + outlineThickness);
         window.draw(verticalTile);
@@ -146,7 +166,7 @@ void Game::drawBoard(sf::RenderWindow &window) {
     }
 
     sf::RectangleShape horizontalTile(sf::Vector2f(tileSize, cornerTileSize));
-    horizontalTile.setFillColor(sf::Color::White);
+    horizontalTile.setFillColor(sf::Color::Transparent);  // Make transparent
     horizontalTile.setOutlineColor(sf::Color::Black);
     horizontalTile.setOutlineThickness(outlineThickness);
 
@@ -162,8 +182,9 @@ void Game::drawBoard(sf::RenderWindow &window) {
         window.draw(horizontalTile);
     }
 
-   
+     window.draw(monopolyImage);
 }
+
 
 
 
