@@ -4,9 +4,11 @@
 #include "board.hpp"
 #include "dice.hpp"
 #include "player.hpp"
+#include "specialTiles.hpp"
 #include <memory>
 #include <vector>
 #include <algorithm>
+#include <SFML/Graphics.hpp>
 
 class Game {
 private:
@@ -51,6 +53,9 @@ public:
     std::shared_ptr<Tile> getTile(int index) const {
         return board.getTile(index);  // Delegate to the Board class's getTile
     }
+
+    void drawBoard(sf::RenderWindow& window);
+    void initializeBoard();
 
     // Use shared_ptr to set the Dice
     void setDice(std::shared_ptr<Dice> newDice) {
