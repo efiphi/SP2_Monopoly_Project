@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <iostream>
+#include <SFML/Graphics.hpp>
 #include "tile.hpp"
 #include "streetTile.hpp"
 #include "railroadTile.hpp"
@@ -21,13 +22,21 @@ private:
     int jailTurns;                           // Number of turns the player has spent in jail
     std::vector<std::shared_ptr<Tile>> ownedProperties;  // Properties owned by the player
     int lastDiceRoll;                        // Last dice roll result
-    int numberOfUtilities;                   // Number of utilities owned
+    int numberOfUtilities;  
+    
 
 public:
+
+    int location;
+    sf::Color color;
+
     // Constructor
     Player(const std::string& name, int startingMoney = 1500)
         : name(name), money(startingMoney), position(0), inJail(false), jailTurns(0), lastDiceRoll(0), numberOfUtilities(0) {}
-
+    
+    Player(sf::Color c, int startLocation = 0)
+        : color(c), location(startLocation) {}
+    
     // Get player's name
     std::string getName() const { return name; }
 
@@ -40,6 +49,10 @@ public:
     // Check if the player is bankrupt
     bool isBankrupt() const {
      return money == 0 && ownedProperties.empty();
+    }
+
+    void move(int steps) {
+        location = (location + steps) % 40; // Move forward, loop back if passing 'GO'
     }
 
 

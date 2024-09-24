@@ -54,6 +54,10 @@ public:
         return board.getTile(index);  // Delegate to the Board class's getTile
     }
 
+    sf::Vector2f getTilePosition(int tileIndex, double tileSize, int cornerTileSize);
+    
+    void drawPlayers(sf::RenderWindow &window, const std::vector<std::shared_ptr<Player>>& players);
+
     void drawBoard(sf::RenderWindow& window);
     void initializeBoard();
 
