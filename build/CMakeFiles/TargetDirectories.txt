@@ -1,0 +1,3 @@
+/home/ubuntu/Desktop/TM/TM2/TM2_Project/build/CMakeFiles/monopoly.dir
+/home/ubuntu/Desktop/TM/TM2/TM2_Project/build/CMakeFiles/edit_cache.dir
+/home/ubuntu/Desktop/TM/TM2/TM2_Project/build/CMakeFiles/rebuild_cache.dir
