@@ -14,10 +14,10 @@ TARGET = monopoly_game
 TEST_TARGET = test_game
 
 # Source files
-SRCS = main.cpp game.cpp streetTile.cpp railroadTile.cpp player.cpp
+SRCS = main.cpp game.cpp streetTile.cpp railroadTile.cpp player.cpp board.cpp
 
 # Test source files (replace test.cpp with your actual test files)
-TEST_SRCS = test.cpp game.cpp streetTile.cpp railroadTile.cpp player.cpp
+TEST_SRCS = test.cpp game.cpp streetTile.cpp railroadTile.cpp player.cpp board.cpp
 
 # Object files
 OBJS = $(SRCS:.cpp=.o)

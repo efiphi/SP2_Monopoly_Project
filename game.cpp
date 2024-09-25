@@ -94,16 +94,46 @@ void Game::addTile(std::shared_ptr<Tile> tile, const sf::Vector2f& position) {
     board.addTile(tile, position);
 }
 
+void Game::drawStar(sf::RenderWindow &window, const sf::Vector2f &position, int tileIndex, sf::Color color) {
+    // Specify which tile indices correspond to special tiles where no stars should be drawn
+    std::vector<int> noStarTiles = {0, 2, 7, 10, 17, 20, 22, 30, 33, 36};  // Indices for Go, Chance, Community Chest, Jail, etc.
+
+    // Check if the current tile index is one of the special tiles
+    if (std::find(noStarTiles.begin(), noStarTiles.end(), tileIndex) != noStarTiles.end()) {
+        return;  // Do nothing if it's a special tile
+    }
+
+    // Create a star shape and set its color
+    sf::CircleShape star(8, 5);  // Create a star-shaped polygon
+    star.setFillColor(color);    // Set the star color
+
+    // Adjust the position of the star based on the tile row/column
+    sf::Vector2f adjustedPosition = position;
+    if (tileIndex >= 0 && tileIndex <= 9) {  // Bottom row
+        adjustedPosition.x -= 10;
+        adjustedPosition.y -= 40;
+    } else if (tileIndex >= 10 && tileIndex <= 19) {  // Left column
+        adjustedPosition.x += 35;
+        adjustedPosition.y += 5;
+    } else if (tileIndex >= 20 && tileIndex <= 29) {  // Top row
+        adjustedPosition.x -= 10;
+        adjustedPosition.y += 35;
+    } else if (tileIndex >= 30 && tileIndex <= 39) {  // Right column
+        adjustedPosition.x -= 50;
+        adjustedPosition.y -= 15;
+    }
+
+    // Set the adjusted position for the star and draw it
+    star.setPosition(adjustedPosition.x, adjustedPosition.y);
+    window.draw(star);
+}
+
 void Game::drawBoard(sf::RenderWindow &window) {
     sf::RectangleShape tile;
-    const double tileSize = 61.5;
-    const int cornerTileSize = 118;
+    
     const int windowWidth = 800;
     const int windowHeight = 800;
     
-    // Adjustments to the outline
-    const int outlineThickness = 2;
-
     // Load the Monopoly image
     sf::Texture monopolyTexture;
     if (!monopolyTexture.loadFromFile("monopoly.jpg")) {
@@ -121,81 +151,32 @@ void Game::drawBoard(sf::RenderWindow &window) {
         static_cast<float>(windowHeight) / monopolyTexture.getSize().y
     );
 
-    
-   
+    window.draw(monopolyImage);  // Draw the background Monopoly image
 
-    // Corner tiles with larger size
-    sf::RectangleShape cornerTile(sf::Vector2f(cornerTileSize, cornerTileSize));
-    cornerTile.setFillColor(sf::Color::Transparent);  // Make the corners transparent to show the image underneath
-    cornerTile.setOutlineColor(sf::Color::Black);
-    cornerTile.setOutlineThickness(outlineThickness);
+    // Define tile positions
+    std::vector<sf::Vector2f> tilePositions = {
+        {750, 741}, {655, 741}, {600, 741}, {540, 741}, {475, 741}, {405, 741}, {330, 741}, {250, 741}, {200, 741}, {140, 741}, 
+        {50, 741}, {50, 655}, {50, 600}, {50, 540}, {50, 475}, {50, 405}, {50, 330}, {50, 250}, {50, 200}, {50, 140}, 
+        {50, 50}, {140, 50}, {200, 50}, {250, 50}, {330, 50}, {405, 50}, {475, 50}, {540, 50}, {600, 50}, {655, 50}, 
+        {750, 50}, {750, 140}, {750, 200}, {750, 250}, {750, 330}, {750, 405}, {750, 475}, {750, 540}, {750, 600}, {750, 655}
+    };
 
-    // Top-left corner
-    cornerTile.setPosition(outlineThickness, outlineThickness);
-    window.draw(cornerTile);
+    // Draw each tile's star, representing ownership
+    for (int i = 0; i < board.getTileCount(); ++i) {
+        auto tile = board.getTile(i);
 
-    // Top-right corner
-    cornerTile.setPosition(windowWidth - cornerTileSize - outlineThickness, outlineThickness);
-    window.draw(cornerTile);
+        // Determine if the tile is occupied and get the owner's color
+        sf::Color starColor = tile->isOccupied() ? tile->getOwner()->color : sf::Color::White;
 
-    // Bottom-left corner
-    cornerTile.setPosition(outlineThickness, windowHeight - cornerTileSize - outlineThickness);
-    window.draw(cornerTile);
-
-    // Bottom-right corner
-    cornerTile.setPosition(windowWidth - cornerTileSize - outlineThickness, windowHeight - cornerTileSize - outlineThickness);
-    window.draw(cornerTile);
-
-    // Regular tiles
-    sf::RectangleShape verticalTile(sf::Vector2f(cornerTileSize, tileSize));
-    verticalTile.setFillColor(sf::Color::Transparent);  // Tiles transparent to show the image
-    verticalTile.setOutlineColor(sf::Color::Black);
-    verticalTile.setOutlineThickness(outlineThickness);
-
-    // Left column (between corners)
-    for (int i = 1; i < 10; ++i) {
-        verticalTile.setPosition(outlineThickness, cornerTileSize + 2.5 + (i - 1) * tileSize + outlineThickness);
-        window.draw(verticalTile);
+        // Draw star on the top-right corner
+        drawStar(window, tilePositions[i], i, starColor);
     }
 
-    // Right column (between corners)
-    for (int i = 1; i < 10; ++i) {
-        verticalTile.setPosition(windowWidth - cornerTileSize - outlineThickness, cornerTileSize + 2.5 + (i - 1) * tileSize + outlineThickness);
-        window.draw(verticalTile);
-    }
-
-    sf::RectangleShape horizontalTile(sf::Vector2f(tileSize, cornerTileSize));
-    horizontalTile.setFillColor(sf::Color::Transparent);  // Make transparent
-    horizontalTile.setOutlineColor(sf::Color::Black);
-    horizontalTile.setOutlineThickness(outlineThickness);
-
-    // Top row (between corners)
-    for (int i = 1; i < 10; ++i) {
-        horizontalTile.setPosition(cornerTileSize + 3 + (i - 1) * tileSize + outlineThickness, outlineThickness);
-        window.draw(horizontalTile);
-    }
-
-    // Bottom row (between corners)
-    for (int i = 1; i < 10; ++i) {
-        horizontalTile.setPosition(cornerTileSize + 3 + (i - 1) * tileSize + outlineThickness, windowHeight - cornerTileSize - outlineThickness);
-        window.draw(horizontalTile);
-    }
-
-     window.draw(monopolyImage);
-
-      for (const auto& player : players) {
-        sf::CircleShape playerMarker(10);  // Radius of the player marker
-        playerMarker.setFillColor(player->color);
-        
-        // Get the position of the player's current tile
-        sf::Vector2f tilePosition = getTilePosition(player->location, tileSize, cornerTileSize);
-        
-        // Offset the player position to be at the bottom-center of the tile
-        playerMarker.setPosition(tilePosition.x + tileSize / 2 - 10, tilePosition.y + tileSize - 20);
-        window.draw(playerMarker);
-    }
-
+    // Draw players on the board
+    drawPlayers(window, players);
 }
+
+
 
 sf::Vector2f Game::getTilePosition(int tileIndex, double tileSize, int cornerTileSize) {
     if (tileIndex < 10) {
@@ -216,10 +197,6 @@ sf::Vector2f Game::getTilePosition(int tileIndex, double tileSize, int cornerTil
 
 
 void Game::drawPlayers(sf::RenderWindow &window, const std::vector<std::shared_ptr<Player>>& players) {
-    const double tileSize = 61.5;
-    const int cornerTileSize = 118;
-    const int windowWidth = 800;
-    const int windowHeight = 800;
 
     // Define tile positions (clockwise, starting from GO)
     std::vector<sf::Vector2f> tilePositions = {
@@ -269,50 +246,50 @@ void Game::drawPlayers(sf::RenderWindow &window, const std::vector<std::shared_p
 
 void Game::initializeBoard() {
     // Bottom row (right to left)
-    addTile(std::make_shared<StartTile>("Go"), {750, 741});                      // 0
-    addTile(std::make_shared<StreetTile>("Mediterranean Ave", "Brown", 60, 2), {655, 741});  // 1
-    addTile(std::make_shared<CommunityChestTile>("Community Chest"), {600, 741}); // 2
-    addTile(std::make_shared<StreetTile>("Baltic Ave", "Brown", 60, 4), {540, 741});    // 3
-    addTile(std::make_shared<TaxTile>("Income Tax"), {475, 741});                // 4
-    addTile(std::make_shared<RailroadTile>("Reading Railroad"), {405, 741});     // 5
-    addTile(std::make_shared<StreetTile>("Oriental Ave", "Light Blue", 100, 6), {330, 741}); // 6
-    addTile(std::make_shared<ChanceTile>("Chance"), {250, 741});                 // 7
-    addTile(std::make_shared<StreetTile>("Vermont Ave", "Light Blue", 100, 6), {200, 741}); // 8
-    addTile(std::make_shared<StreetTile>("Connecticut Ave", "Light Blue", 120, 8), {140, 741}); // 9
+    board.addTile(std::make_shared<StartTile>("Go"), {750, 741});                      // 0
+    board.addTile(std::make_shared<StreetTile>("Mediterranean Ave", "Brown", 60, 2), {655, 741});  // 1
+    board.addTile(std::make_shared<CommunityChestTile>("Community Chest"), {600, 741}); // 2
+    board.addTile(std::make_shared<StreetTile>("Baltic Ave", "Brown", 60, 4), {540, 741});    // 3
+    board.addTile(std::make_shared<TaxTile>("Income Tax"), {475, 741});                // 4
+    board.addTile(std::make_shared<RailroadTile>("Reading Railroad"), {405, 741});     // 5
+    board.addTile(std::make_shared<StreetTile>("Oriental Ave", "Light Blue", 100, 6), {330, 741}); // 6
+    board.addTile(std::make_shared<ChanceTile>("Chance"), {250, 741});                 // 7
+    board.addTile(std::make_shared<StreetTile>("Vermont Ave", "Light Blue", 100, 6), {200, 741}); // 8
+    board.addTile(std::make_shared<StreetTile>("Connecticut Ave", "Light Blue", 120, 8), {140, 741}); // 9
 
     // Left column (bottom to top)
-    addTile(std::make_shared<JailTile>("Jail"), {50, 741});                      // 10
-    addTile(std::make_shared<StreetTile>("St. Charles Place", "Pink", 140, 10), {50, 655}); // 11
-    addTile(std::make_shared<UtilityTile>("Electric Company"), {50, 600});       // 12
-    addTile(std::make_shared<StreetTile>("States Ave", "Pink", 140, 10), {50, 540}); // 13
-    addTile(std::make_shared<StreetTile>("Virginia Ave", "Pink", 160, 12), {50, 475}); // 14
-    addTile(std::make_shared<RailroadTile>("Pennsylvania Railroad"), {50, 405}); // 15
-    addTile(std::make_shared<StreetTile>("St. James Place", "Orange", 180, 14), {50, 330}); // 16
-    addTile(std::make_shared<CommunityChestTile>("Community Chest"), {50, 250}); // 17
-    addTile(std::make_shared<StreetTile>("Tennessee Ave", "Orange", 180, 14), {50, 200}); // 18
-    addTile(std::make_shared<StreetTile>("New York Ave", "Orange", 200, 16), {50, 140}); // 19
+    board.addTile(std::make_shared<JailTile>("Jail"), {50, 741});                      // 10
+    board.addTile(std::make_shared<StreetTile>("St. Charles Place", "Pink", 140, 10), {50, 655}); // 11
+    board.addTile(std::make_shared<UtilityTile>("Electric Company"), {50, 600});       // 12
+    board.addTile(std::make_shared<StreetTile>("States Ave", "Pink", 140, 10), {50, 540}); // 13
+    board.addTile(std::make_shared<StreetTile>("Virginia Ave", "Pink", 160, 12), {50, 475}); // 14
+    board.addTile(std::make_shared<RailroadTile>("Pennsylvania Railroad"), {50, 405}); // 15
+    board.addTile(std::make_shared<StreetTile>("St. James Place", "Orange", 180, 14), {50, 330}); // 16
+    board.addTile(std::make_shared<CommunityChestTile>("Community Chest"), {50, 250}); // 17
+    board.addTile(std::make_shared<StreetTile>("Tennessee Ave", "Orange", 180, 14), {50, 200}); // 18
+    board.addTile(std::make_shared<StreetTile>("New York Ave", "Orange", 200, 16), {50, 140}); // 19
 
     // Top row (left to right)
-    addTile(std::make_shared<FreeParkingTile>("Free Parking"), {50, 50});        // 20
-    addTile(std::make_shared<StreetTile>("Kentucky Ave", "Red", 220, 18), {140, 50}); // 21
-    addTile(std::make_shared<ChanceTile>("Chance"), {200, 50});                  // 22
-    addTile(std::make_shared<StreetTile>("Indiana Ave", "Red", 220, 18), {250, 50}); // 23
-    addTile(std::make_shared<StreetTile>("Illinois Ave", "Red", 240, 20), {330, 50}); // 24
-    addTile(std::make_shared<RailroadTile>("B&O Railroad"), {405, 50});          // 25
-    addTile(std::make_shared<StreetTile>("Atlantic Ave", "Yellow", 260, 22), {475, 50}); // 26
-    addTile(std::make_shared<StreetTile>("Ventnor Ave", "Yellow", 260, 22), {540, 50}); // 27
-    addTile(std::make_shared<UtilityTile>("Water Works"), {600, 50});            // 28
-    addTile(std::make_shared<StreetTile>("Marvin Gardens", "Yellow", 280, 24), {655, 50}); // 29
+    board.addTile(std::make_shared<FreeParkingTile>("Free Parking"), {50, 50});        // 20
+    board.addTile(std::make_shared<StreetTile>("Kentucky Ave", "Red", 220, 18), {140, 50}); // 21
+    board.addTile(std::make_shared<ChanceTile>("Chance"), {200, 50});                  // 22
+    board.addTile(std::make_shared<StreetTile>("Indiana Ave", "Red", 220, 18), {250, 50}); // 23
+    board.addTile(std::make_shared<StreetTile>("Illinois Ave", "Red", 240, 20), {330, 50}); // 24
+    board.addTile(std::make_shared<RailroadTile>("B&O Railroad"), {405, 50});          // 25
+    board.addTile(std::make_shared<StreetTile>("Atlantic Ave", "Yellow", 260, 22), {475, 50}); // 26
+    board.addTile(std::make_shared<StreetTile>("Ventnor Ave", "Yellow", 260, 22), {540, 50}); // 27
+    board.addTile(std::make_shared<UtilityTile>("Water Works"), {600, 50});            // 28
+    board.addTile(std::make_shared<StreetTile>("Marvin Gardens", "Yellow", 280, 24), {655, 50}); // 29
 
     // Right column (top to bottom)
-    addTile(std::make_shared<GoToJailTile>("Go to Jail"), {750, 50});            // 30
-    addTile(std::make_shared<StreetTile>("Pacific Ave", "Green", 300, 26), {750, 140}); // 31
-    addTile(std::make_shared<StreetTile>("North Carolina Ave", "Green", 300, 26), {750, 200}); // 32
-    addTile(std::make_shared<CommunityChestTile>("Community Chest"), {750, 250}); // 33
-    addTile(std::make_shared<StreetTile>("Pennsylvania Ave", "Green", 320, 28), {750, 330}); // 34
-    addTile(std::make_shared<RailroadTile>("Short Line"), {750, 405});           // 35
-    addTile(std::make_shared<ChanceTile>("Chance"), {750, 475});                 // 36
-    addTile(std::make_shared<StreetTile>("Park Place", "Blue", 350, 35), {750, 540}); // 37
-    addTile(std::make_shared<TaxTile>("Luxury Tax"), {750, 600});                // 38
-    addTile(std::make_shared<StreetTile>("Boardwalk", "Blue", 400, 50), {750, 655}); // 39
+    board.addTile(std::make_shared<GoToJailTile>("Go to Jail"), {750, 50});            // 30
+    board.addTile(std::make_shared<StreetTile>("Pacific Ave", "Green", 300, 26), {750, 140}); // 31
+    board.addTile(std::make_shared<StreetTile>("North Carolina Ave", "Green", 300, 26), {750, 200}); // 32
+    board.addTile(std::make_shared<CommunityChestTile>("Community Chest"), {750, 250}); // 33
+    board.addTile(std::make_shared<StreetTile>("Pennsylvania Ave", "Green", 320, 28), {750, 330}); // 34
+    board.addTile(std::make_shared<RailroadTile>("Short Line"), {750, 405});           // 35
+    board.addTile(std::make_shared<ChanceTile>("Chance"), {750, 475});                 // 36
+    board.addTile(std::make_shared<StreetTile>("Park Place", "Blue", 350, 35), {750, 540}); // 37
+    board.addTile(std::make_shared<TaxTile>("Luxury Tax"), {750, 600});                // 38
+    board.addTile(std::make_shared<StreetTile>("Boardwalk", "Blue", 400, 50), {750, 655}); // 39
 }

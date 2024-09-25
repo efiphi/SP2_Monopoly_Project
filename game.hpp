@@ -22,7 +22,7 @@ private:
 public:
     // Constructor
     Game(const std::vector<std::shared_ptr<Player>>& playerList)
-        : players(playerList), currentPlayerIndex(0), doubleCount(0), dice(std::make_shared<Dice>()) {}
+        : board(), players(playerList), currentPlayerIndex(0), doubleCount(0), dice(std::make_shared<Dice>()) {}
 
     // Play a turn for the current player
     void playTurn();
@@ -38,6 +38,10 @@ public:
 
     // Start the game
     void start();
+
+    Board& getBoard() {
+        return board;
+    }
 
     // Check and remove bankrupt players
     void checkBankruptcy() {
@@ -59,6 +63,9 @@ public:
     void drawPlayers(sf::RenderWindow &window, const std::vector<std::shared_ptr<Player>>& players);
 
     void drawBoard(sf::RenderWindow& window);
+
+    void drawStar(sf::RenderWindow &window, const sf::Vector2f &position, int tileIndex, sf::Color color);
+
     void initializeBoard();
 
     // Use shared_ptr to set the Dice

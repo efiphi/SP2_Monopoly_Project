@@ -13,6 +13,9 @@ private:
     std::vector<sf::Vector2f> tilePositions;  // Stores graphical positions for each tile
 
 public:
+
+    Board();
+    
     // Add a tile to the board with its graphical position
     void addTile(std::shared_ptr<Tile> tile, const sf::Vector2f& position) {
         if (tiles.size() < 40) {
@@ -30,6 +33,11 @@ public:
         }
         return false;
     }
+
+    int getTileCount() const {
+        return static_cast<int>(tiles.size());
+    }
+
 
     // Get a tile by its position
     std::shared_ptr<Tile> getTile(int position) const {

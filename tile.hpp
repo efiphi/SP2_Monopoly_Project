@@ -26,6 +26,8 @@ public:
     virtual void onLand(std::shared_ptr<Player> player) = 0; // Pure virtual function
 
     virtual ~Tile() = default; //Destructor
+
+    
 };
 
 #endif // TILE_HPP

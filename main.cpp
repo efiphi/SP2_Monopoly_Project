@@ -2,14 +2,14 @@
 #include <memory>
 #include <vector>
 #include "game.hpp"
+#include "board.hpp"
 
 // Assuming you have the Player class and the Game class with drawPlayers implemented
 int main() {
     // Create a window
     sf::RenderWindow window(sf::VideoMode(800, 800), "Monopoly Board Test");
 
-    
-    
+    Board board;
 
     // Create test players
     std::vector<std::shared_ptr<Player>> players;
@@ -17,16 +17,24 @@ int main() {
     Game game(players);
     
     // Adding 4 players with different colors and positions
-    auto player1 = std::make_shared<Player>(sf::Color::Red, 1);
-    auto player2 = std::make_shared<Player>(sf::Color::Blue, 8);
-    auto player3 = std::make_shared<Player>(sf::Color::Green, 26);
-    auto player4 = std::make_shared<Player>(sf::Color::Yellow, 35);
+    auto player1 = std::make_shared<Player>(sf::Color::Red, 9);
+    auto player2 = std::make_shared<Player>(sf::Color::Blue, 23);
+    auto player3 = std::make_shared<Player>(sf::Color::Green, 15);
+    auto player4 = std::make_shared<Player>(sf::Color::Yellow, 39);
     
+    auto tile1 = game.getBoard().getTile(1);
+    if (tile1) {
+        tile1->setOwner(player1);
+    } else {
+        std::cerr << "Tile 1 is null" << std::endl;
+    }
+
     
     players.push_back(player1);
     players.push_back(player2);
     players.push_back(player3);
     players.push_back(player4);
+
 
     // Game loop
     while (window.isOpen()) {
