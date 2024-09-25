@@ -17,10 +17,10 @@ int main() {
     Game game(players);
     
     // Adding 4 players with different colors and positions
-    auto player1 = std::make_shared<Player>(sf::Color::Red, 5);
-    auto player2 = std::make_shared<Player>(sf::Color::Blue, 5);
-    auto player3 = std::make_shared<Player>(sf::Color::Green, 5);
-    auto player4 = std::make_shared<Player>(sf::Color::Yellow, 20);
+    auto player1 = std::make_shared<Player>(sf::Color::Red, 1);
+    auto player2 = std::make_shared<Player>(sf::Color::Blue, 8);
+    auto player3 = std::make_shared<Player>(sf::Color::Green, 26);
+    auto player4 = std::make_shared<Player>(sf::Color::Yellow, 35);
     
     
     players.push_back(player1);
