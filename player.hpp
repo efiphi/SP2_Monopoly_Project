@@ -51,18 +51,13 @@ public:
      return money == 0 && ownedProperties.empty();
     }
 
-    void move(int steps) {
-        location = (location + steps) % 40; // Move forward, loop back if passing 'GO'
-    }
-
-
 
     // Get player's current position on the board
     int getPosition() const { return position; }
 
     // Move the player by a given number of positions
-    void move(int steps, int boardSize) {
-        position = (position + steps) % boardSize;  // Wrap around if they pass the start tile
+    void move(int diceRoll) {
+         location = (location + diceRoll) % 40;  // Wrap around if they pass the start tile
     }
 
     // Equality operator

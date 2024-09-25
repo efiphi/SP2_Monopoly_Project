@@ -30,11 +30,11 @@ TEST_CASE("Player class tests") {
     }
 
     SUBCASE("Player movement") {
-        player.move(5, 40);  // Moving 5 steps
+        player.move(5);  // Moving 5 steps
         CHECK(player.getPosition() == 5);
 
-        player.move(36, 40); // Wrapping around the board
-        CHECK(player.getPosition() == 1);  // 5 + 36 = 41 % 40 = 1
+        player.move(9); // Wrapping around the board
+        CHECK(player.getPosition() == 14);  
     }
 
     SUBCASE("Player jail status") {

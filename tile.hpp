@@ -23,7 +23,9 @@ public:
     void setOwner(std::shared_ptr<Player> newOwner) { owner = newOwner; }
     std::shared_ptr<Player> getOwner() const {return owner; }
 
-    virtual void onLand(Player& player) = 0; // Pure virtual function
+    virtual void onLand(std::shared_ptr<Player> player) = 0; // Pure virtual function
+
+    virtual ~Tile() = default; //Destructor
 };
 
 #endif // TILE_HPP

@@ -24,11 +24,12 @@ public:
 
     // Calculate rent based on how many railroads the owner has
     int calculateRent() const {
-        if (numberOfRailroadsOwned == 0) {
-            return baseRent;  // Return base rent if no railroads are set (prevent division issues)
+        if (isOccupied()){
+            return baseRent * numberOfRailroadsOwned;  // Rent is 50 * the number of railroads owned
         }
-        return baseRent * numberOfRailroadsOwned;  // Rent is 50 * the number of railroads owned
+    return baseRent;
     }
+
 
     // Update the number of railroads the owner has
     void setNumberOfRailroadsOwned(int number) {
@@ -36,7 +37,7 @@ public:
     }
 
     // Define what happens when a player lands on this railroad
-    void onLand(Player& player) override;
+    void onLand(std::shared_ptr<Player> player) override;
 };
 
 #endif // RAILROAD_TILE_HPP

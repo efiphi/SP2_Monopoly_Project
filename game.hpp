@@ -34,7 +34,7 @@ public:
     bool checkForWinner();
 
     // Add a tile to the board
-    void addTile(std::shared_ptr<Tile> tile);
+    void addTile(std::shared_ptr<Tile> tile, const sf::Vector2f& position);
 
     // Start the game
     void start();
@@ -67,7 +67,6 @@ public:
     }
 
     std::pair<int, int> getDiceRoll() const { return lastDiceRoll; }  // Expose last dice roll
-    int getTileCount() const { return board.getTileCount(); } 
     bool isDouble(const std::pair<int, int>& diceRoll) const { return dice->isDouble(diceRoll); }  // Check for double
 };
 

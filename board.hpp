@@ -5,16 +5,19 @@
 #include <memory>
 #include <iostream>
 #include "tile.hpp"
+#include <SFML/Graphics.hpp>
 
 class Board {
 private:
     std::vector<std::shared_ptr<Tile>> tiles;
+    std::vector<sf::Vector2f> tilePositions;  // Stores graphical positions for each tile
 
 public:
-    // Add a tile to the board
-    void addTile(std::shared_ptr<Tile> tile) {
+    // Add a tile to the board with its graphical position
+    void addTile(std::shared_ptr<Tile> tile, const sf::Vector2f& position) {
         if (tiles.size() < 40) {
             tiles.push_back(tile);
+            tilePositions.push_back(position);  // Add the graphical position
         }
     }
 
@@ -22,13 +25,10 @@ public:
     bool removeTile(int index) {
         if (index >= 0 && index < static_cast<int>(tiles.size())) {
             tiles.erase(tiles.begin() + index);
+            tilePositions.erase(tilePositions.begin() + index);  // Remove the graphical position
             return true;
         }
         return false;
-    }
-
-    int getTileCount() const {
-        return tiles.size();
     }
 
     // Get a tile by its position
@@ -37,6 +37,14 @@ public:
             return tiles[position];
         }
         return nullptr;
+    }
+
+    // Get the graphical position of a tile
+    sf::Vector2f getTilePosition(int index) const {
+        if (index >= 0 && index < static_cast<int>(tilePositions.size())) {
+            return tilePositions[index];
+        }
+        return sf::Vector2f(0, 0);  // Return (0,0) if the index is invalid
     }
 
     // Display the entire board (for debug purposes)

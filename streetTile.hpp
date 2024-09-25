@@ -37,13 +37,10 @@ public:
 
     // Calculate the current rent dynamically based on houses or hotel
     int calculateRent() const {
-        if (hasHotel) {
-            return baseRent * std::pow(2, 5); // Rent with hotel: baseRent * 2^4
-        } else if (houses > 0) {
-            return baseRent * std::pow(2, houses); // Rent with houses: baseRent * 2^(houses-1)
-        } else {
-            return baseRent; // Rent with no houses or hotel
+        if (isOccupied()) {
+            return (hasHotel) ? baseRent * 2^4 : baseRent * std::pow(2, houses);
         }
+        return baseRent;
     }
 
     // Method to build a house (adds 1 house if possible and all color group streets have the same or fewer houses)
@@ -91,7 +88,7 @@ public:
     }
 
     // Define what happens when a player lands on this street
-    void onLand(Player& player) override;
+    void onLand(std::shared_ptr<Player> player) override;
 };
 
 #endif // STREET_TILE_HPP
