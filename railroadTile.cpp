@@ -12,7 +12,7 @@ void RailroadTile::onLand(std::shared_ptr<Player> player) {
         } else {
             std::cout << player->getName() << " doesn't have enough money to buy " << getName() << ".\n";
         }
-    } else if (owner->getName() != player->getName()) {
+    } else if (owner != nullptr) {
         int rent = calculateRent();
         std::cout << player->getName() << " landed on " << owner->getName() << "'s railroad and must pay $" << rent << " in rent.\n";
         player->payRent(*owner, rent);

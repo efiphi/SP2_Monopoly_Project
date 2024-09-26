@@ -17,7 +17,6 @@ class Player : public std::enable_shared_from_this<Player> {
 private:
     std::string name;                        // Player's name
     int money;                               // Player's current balance
-    int position;                            // Player's current position on the board (index of the tile)
     bool inJail;                             // Whether the player is in jail
     int jailTurns;                           // Number of turns the player has spent in jail
     std::vector<std::shared_ptr<Tile>> ownedProperties;  // Properties owned by the player
@@ -32,7 +31,7 @@ public:
 
     // Constructor
     Player(const std::string& name, int startingMoney = 1500)
-        : name(name), money(startingMoney), position(0), inJail(false), jailTurns(0), lastDiceRoll(0), numberOfUtilities(0) {}
+        : name(name), money(startingMoney), location(0), inJail(false), jailTurns(0), lastDiceRoll(0), numberOfUtilities(0) {}
     
     Player(sf::Color c, int startLocation = 0)
         : color(c), location(startLocation) {}
@@ -53,7 +52,8 @@ public:
 
 
     // Get player's current position on the board
-    int getPosition() const { return position; }
+    int getPosition() const { return location; }
+    void setPosition(int newLocation) { location = newLocation;}
 
     // Move the player by a given number of positions
     void move(int diceRoll) {
@@ -71,7 +71,7 @@ public:
 
     // Jail management
     bool isInJail() const { return inJail; }
-    void goToJail() { inJail = true; position = 10; jailTurns = 0; }
+    void goToJail() { inJail = true; location = 10; jailTurns = 0; }
     void releaseFromJail() { inJail = false; }
     void handleJailTurn() {
         jailTurns++;
@@ -155,7 +155,7 @@ void declareBankruptcy(Player& owner) {
 
     // Display player info
     void displayPlayerInfo() const {
-        std::cout << "Player: " << name << "\nMoney: $" << money << "\nPosition: " << position << "\n";
+        std::cout << "Player: " << name << "\nMoney: $" << money << "\nPosition: " << location << "\n";
         std::cout << "Properties owned: \n";
         for (const auto& property : ownedProperties) {
             std::cout << "- " << property->getName() << " (" << property->getTileType() << ")\n";

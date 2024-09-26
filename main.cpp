@@ -9,7 +9,7 @@ int main() {
     // Create a window
     sf::RenderWindow window(sf::VideoMode(800, 800), "Monopoly Board Test");
 
-    Board board;
+    Board& board = Board::getInstance();
 
     // Create test players
     std::vector<std::shared_ptr<Player>> players;
@@ -22,12 +22,13 @@ int main() {
     auto player3 = std::make_shared<Player>(sf::Color::Green, 15);
     auto player4 = std::make_shared<Player>(sf::Color::Yellow, 39);
     
-    auto tile1 = game.getBoard().getTile(1);
-    if (tile1) {
-        tile1->setOwner(player1);
-    } else {
-        std::cerr << "Tile 1 is null" << std::endl;
-    }
+    game.getBoard().getTile(1)->setOwner(player1);
+    game.getBoard().getTile(6)->setOwner(player2);
+    game.getBoard().getTile(11)->setOwner(player3);
+    game.getBoard().getTile(15)->setOwner(player4);
+    game.getBoard().getTile(21)->setOwner(player1);
+    game.getBoard().getTile(39)->setOwner(player2);
+    game.getBoard().getTile(35)->setOwner(player1);
 
     
     players.push_back(player1);

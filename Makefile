@@ -34,7 +34,7 @@ $(TARGET): $(OBJS)
 
 # Rule to create the test executable
 $(TEST_TARGET): $(TEST_OBJS)
-	$(CXX) $(CXXFLAGS) -o $(TEST_TARGET) $(TEST_OBJS)
+	$(CXX) $(CXXFLAGS) -o $(TEST_TARGET) $(TEST_OBJS) $(SFML_FLAGS)
 
 # Rule to run tests
 test: $(TEST_TARGET)

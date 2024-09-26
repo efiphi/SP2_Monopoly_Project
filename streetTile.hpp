@@ -37,10 +37,13 @@ public:
 
     // Calculate the current rent dynamically based on houses or hotel
     int calculateRent() const {
-        if (isOccupied()) {
-            return (hasHotel) ? baseRent * 2^4 : baseRent * std::pow(2, houses);
+          if (hasHotel) {
+        return baseRent * std::pow(2, 5);  // Rent for hotel
+        } else if (houses > 0) {
+         return baseRent * std::pow(2, houses);  // Rent for houses
         }
-        return baseRent;
+        return baseRent;  // Rent for no houses or hotel
+        
     }
 
     // Method to build a house (adds 1 house if possible and all color group streets have the same or fewer houses)

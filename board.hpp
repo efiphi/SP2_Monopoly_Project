@@ -12,10 +12,20 @@ private:
     std::vector<std::shared_ptr<Tile>> tiles;
     std::vector<sf::Vector2f> tilePositions;  // Stores graphical positions for each tile
 
-public:
-
+    // Private constructor (Singleton pattern)
     Board();
-    
+
+public:
+    // Singleton access method
+    static Board& getInstance() {
+        static Board instance;
+        return instance;
+    }
+
+    // Delete copy constructor and assignment to prevent duplication
+    Board(const Board&) = delete;
+    void operator=(const Board&) = delete;
+
     // Add a tile to the board with its graphical position
     void addTile(std::shared_ptr<Tile> tile, const sf::Vector2f& position) {
         if (tiles.size() < 40) {
@@ -34,10 +44,9 @@ public:
         return false;
     }
 
-    int getTileCount() const {
-        return static_cast<int>(tiles.size());
-    }
 
+    // Get the number of tiles
+    int getTileCount() const { return static_cast<int>(tiles.size()); }
 
     // Get a tile by its position
     std::shared_ptr<Tile> getTile(int position) const {

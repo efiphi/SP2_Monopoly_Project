@@ -13,6 +13,11 @@ void Game::playTurn() {
         return;
     }
 
+    // Roll dice, or use mocked dice if already set
+    if (!dice) {
+        dice = std::make_shared<Dice>(); // Reset to random dice if not set externally
+    }
+    
     auto diceRoll = dice->roll();
     int totalSteps = dice->total(diceRoll);
 
@@ -27,6 +32,7 @@ void Game::playTurn() {
             currentPlayer->goToJail();
             doubleCount = 0;
             nextPlayer();
+            dice.reset();  // Reset dice for next turn
             return;
         }
     } else {
@@ -47,27 +53,28 @@ void Game::playTurn() {
     auto tile = board.getTile(currentPlayer->getPosition());
     tile->onLand(currentPlayer);
 
+    // Handle bankruptcy after landing on a tile
     if (currentPlayer->isBankrupt()) {
         std::cout << currentPlayer->getName() << " has gone bankrupt!" << std::endl;
         checkBankruptcy();
         if (checkForWinner()) return;
     }
 
+    // Handle doubles for extra turn
     if (dice->isDouble(diceRoll)) {
         std::cout << "Player " << currentPlayer->getName() << " gets another turn for rolling doubles!" << std::endl;
+        dice.reset();  // Reset to random dice after the turn
         playTurn();  // Recursively handle another turn
     } else {
+        dice.reset();  // Reset dice for the next player's turn
         nextPlayer();  // Move to the next player
     }
 
+    // Check for game winner at the end of the turn
     if (checkForWinner()) {
         return;  // End the game if there's a winner
     }
 }
-
-
-
-
 // Proceed to the next player
 void Game::nextPlayer() {
     currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
@@ -245,6 +252,8 @@ void Game::drawPlayers(sf::RenderWindow &window, const std::vector<std::shared_p
 
 
 void Game::initializeBoard() {
+
+    Board& board = Board::getInstance();
     // Bottom row (right to left)
     board.addTile(std::make_shared<StartTile>("Go"), {750, 741});                      // 0
     board.addTile(std::make_shared<StreetTile>("Mediterranean Ave", "Brown", 60, 2), {655, 741});  // 1

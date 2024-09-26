@@ -7,7 +7,7 @@
 #include "board.hpp"
 #include "game.hpp"
 #include "dice.hpp"
-
+#include <SFML/System.hpp>
 
 // Test cases for Player class
 TEST_CASE("Player class tests") {
@@ -101,35 +101,24 @@ TEST_CASE("StreetTile class tests") {
     }
 }
 
-// Test cases for Board class
-TEST_CASE("Board class tests") {
-    Board board;
+TEST_CASE("Rent payment") {
+    auto player1 = std::make_shared<Player>("Alice", 1500);
+    auto player2 = std::make_shared<Player>("Bob", 1500);
+    Game game({player1, player2});
 
-    SUBCASE("Adding tiles to the board") {
-        auto tile = std::make_shared<StreetTile>("Park Place", "Blue", 350, 50);
-        board.addTile(tile);
+    CHECK(player1->getMoney() == 1500);  // Alice receives rent
+    CHECK(player2->getMoney() == 1500); 
 
-        CHECK(board.getTileCount() == 1);
-        CHECK(board.getTile(0)->getName() == "Park Place");
-    }
+    game.setDice(std::make_shared<MockDice>(3, 2));  // Alice buys Reading Railroad(200$)
+    game.playTurn();
 
-    SUBCASE("Removing tiles from the board") {
-        auto tile1 = std::make_shared<StreetTile>("Park Place", "Blue", 350, 50);
-        auto tile2 = std::make_shared<StreetTile>("Boardwalk", "Blue", 400, 50);
-        board.addTile(tile1);
-        board.addTile(tile2);
+    game.setDice(std::make_shared<MockDice>(3, 2));  // Bob lands on Reading Railroad(pay 50 to Alice)
+    game.playTurn();
 
-        CHECK(board.getTileCount() == 2);
-        board.removeTile(1);
-        CHECK(board.getTileCount() == 1);
-        CHECK(board.getTile(0)->getName() == "Park Place");
-    }
-
-    SUBCASE("Fetching non-existent tiles") {
-        auto tile = board.getTile(5);  // Out of bounds
-        CHECK(tile == nullptr);
-    }
+    CHECK(player1->getMoney() == 1350);  // Alice receives rent
+    CHECK(player2->getMoney() == 1450);  // Bob pays rent
 }
+
 
 // Test cases for Game class
 TEST_CASE("Game class tests") {
@@ -137,8 +126,6 @@ TEST_CASE("Game class tests") {
     auto player2 = std::make_shared<Player>("Bob", 1500);
     Game game({player1, player2});
 
-    game.addTile(std::make_shared<StreetTile>("Sydney", "Brown", 60, 2));
-    game.addTile(std::make_shared<StreetTile>("Melbourne", "Brown", 60, 4));
 
     SUBCASE("Initial game state") {
         CHECK(game.checkForWinner() == false);
@@ -159,7 +146,6 @@ TEST_CASE("Game class tests") {
     }
 
     SUBCASE("Board and player movement") {
-        CHECK(game.getTileCount() > 0);
 
         game.setDice(std::make_shared<MockDice>(1, 2));  // Mocked dice roll to move Player 1
         game.playTurn();
@@ -182,59 +168,77 @@ TEST_CASE("Property buying") {
     auto player2 = std::make_shared<Player>("Bob", 1500);
     Game game({player1, player2});
 
-    game.addTile(std::make_shared<StreetTile>("Sydney", "Brown", 60, 2));
+   
 
     // Mocked dice to land on Sydney
-    game.setDice(std::make_shared<MockDice>(1, 1));  // Roll to land on Sydney
+    game.setDice(std::make_shared<MockDice>(5, 4));  // Roll to land on Connecticut Ave
     game.playTurn();
 
-    CHECK(player1->getMoney() == 1440);  // Money reduced after buying property
-    CHECK(player1->getPosition() == 2);  // Landed on tile 2
-    CHECK(game.getTile(2)->getOwner() == player1);  // Player 1 owns the tile
+    CHECK(player1->getMoney() == 1380);  // Money reduced after buying property
+    CHECK(player1->getPosition() == 9);  // Landed on tile 9
+    CHECK(game.getTile(9)->getOwner() == player1);  // Player 1 owns the tile
 }
 
-TEST_CASE("Rent payment") {
-    auto player1 = std::make_shared<Player>("Alice", 1500);
-    auto player2 = std::make_shared<Player>("Bob", 1500);
-    Game game({player1, player2});
 
-    game.addTile(std::make_shared<StreetTile>("Melbourne", "Brown", 60, 4));
-    game.setDice(std::make_shared<MockDice>(1, 1));  // Alice buys Melbourne
-    game.playTurn();
-
-    game.setDice(std::make_shared<MockDice>(2, 2));  // Bob lands on Melbourne
-    game.playTurn();
-
-    CHECK(player1->getMoney() == 1504);  // Alice receives rent
-    CHECK(player2->getMoney() == 1496);  // Bob pays rent
-}
 
 TEST_CASE("Go to Jail") {
     auto player1 = std::make_shared<Player>("Alice", 1500);
     Game game({player1});
 
-    game.addTile(std::make_shared<GoToJailTile>("Go to Jail"));
-    game.addTile(std::make_shared<StreetTile>("Sydney", "Brown", 60, 2));
+    // Manually set player position to tile 25 (near jail)
+    player1->setPosition(25);
 
-    game.setDice(std::make_shared<MockDice>(1, 2));  // Mocked dice to land on Go to Jail
+    // Mock dice roll to move the player 5 tiles, landing them on tile 30 (jail)
+    game.setDice(std::make_shared<MockDice>(2, 3));  // This totals 5, moving Alice to tile 30 (jail)
     game.playTurn();
 
+    // Check that the player is now in jail and has moved to tile 30
     CHECK(player1->isInJail() == true);
-    CHECK(player1->getPosition() == 10);  // Jail is typically at position 10
+    CHECK(player1->getPosition() == 10);  // Jail is at position 30
 }
 
+
 TEST_CASE("Player bankruptcy") {
-    auto player1 = std::make_shared<Player>("Alice", 50);
+    auto player1 = std::make_shared<Player>("Alice", 6);
     auto player2 = std::make_shared<Player>("Bob", 1500);
     Game game({player1, player2});
 
-    game.addTile(std::make_shared<StreetTile>("Melbourne", "Brown", 60, 4));
-    game.setDice(std::make_shared<MockDice>(1, 1));  // Alice buys Melbourne
+   
+    game.setDice(std::make_shared<MockDice>(3, 5));  // Alice buys Melbourne
     game.playTurn();
 
-    game.setDice(std::make_shared<MockDice>(2, 2));  // Bob lands on Melbourne
+    game.setDice(std::make_shared<MockDice>(6, 2));  // Bob lands on Melbourne
     game.playTurn();
 
+    
     CHECK(player1->isBankrupt() == true);  // Alice should be bankrupt
     CHECK(game.checkForWinner() == true);  // Bob wins the game
+}
+
+// Test cases for Board class
+TEST_CASE("Board class tests") {    
+    Board& board = Board::getInstance();
+
+    SUBCASE("Checking board initialization") {
+
+        CHECK(board.getTileCount() == 40);
+        CHECK(board.getTile(0)->getName() == "Go");
+        CHECK(board.getTile(1)->getName() == "Mediterranean Ave");
+        CHECK(board.getTile(5)->getName() == "Reading Railroad");
+        CHECK(board.getTile(13)->getName() == "States Ave");
+        CHECK(board.getTile(19)->getName() == "New York Ave");
+        CHECK(board.getTile(36)->getName() == "Chance");
+    }
+
+    SUBCASE("Removing tiles from the board") {
+        
+        board.removeTile(1);
+        CHECK(board.getTileCount() == 39);
+        CHECK(board.getTile(1)->getName() == "Community Chest");
+    }
+
+    SUBCASE("Fetching non-existent tiles") {
+        auto tile = board.getTile(40);  // Out of bounds
+        CHECK(tile == nullptr);
+    }
 }

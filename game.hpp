@@ -12,7 +12,7 @@
 
 class Game {
 private:
-    Board board;
+    Board& board;
     int doubleCount; // To track consecutive doubles
     std::shared_ptr<Dice> dice;  // Use shared_ptr for Dice, allowing MockDice to be injected
     std::vector<std::shared_ptr<Player>> players; // Use shared_ptr for players
@@ -22,7 +22,7 @@ private:
 public:
     // Constructor
     Game(const std::vector<std::shared_ptr<Player>>& playerList)
-        : board(), players(playerList), currentPlayerIndex(0), doubleCount(0), dice(std::make_shared<Dice>()) {}
+        : board(Board::getInstance()), players(playerList), currentPlayerIndex(0), doubleCount(0), dice(std::make_shared<Dice>()) {}
 
     // Play a turn for the current player
     void playTurn();
@@ -69,9 +69,15 @@ public:
     void initializeBoard();
 
     // Use shared_ptr to set the Dice
-    void setDice(std::shared_ptr<Dice> newDice) {
-        dice = newDice;
+    void setDice(std::shared_ptr<Dice> customDice) {
+    this->dice = customDice;
     }
+
+    std::shared_ptr<Dice> rollDice() {
+    return std::make_shared<Dice>();
+    }
+
+
 
     std::pair<int, int> getDiceRoll() const { return lastDiceRoll; }  // Expose last dice roll
     bool isDouble(const std::pair<int, int>& diceRoll) const { return dice->isDouble(diceRoll); }  // Check for double
