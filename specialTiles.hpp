@@ -37,21 +37,30 @@ public:
 
     // Overriding the onLand method
     void onLand(std::shared_ptr<Player> player) override {
-        if (isOccupied()) {
-            if (player->getName() != owner->getName()) {
-                // Player pays rent based on dice roll
-                int diceRoll = player->getLastDiceRoll();  // Assuming Player has a method to get the last dice roll
-                int utilitiesOwned = owner->getNumberOfUtilities();  // Assuming Player tracks number of utilities owned
-                int rent = calculateRent(diceRoll, utilitiesOwned);
-                std::cout << "Player " << player->getName() << " landed on " << name 
-                          << " and pays $" << rent << " to " << owner->getName() << std::endl;
-                player->payRent(*owner, rent);
-            }
+    if (isOccupied()) {
+        // Check if player is not the owner
+        if (player != owner) {
+            // Player pays rent based on dice roll
+            int diceRoll = player->getLastDiceRoll();
+            int utilitiesOwned = owner->getNumberOfUtilities();
+            int rent = calculateRent(diceRoll, utilitiesOwned);
+            std::cout << "Player " << player->getName() << " landed on " << name 
+                      << " and pays $" << rent << " to " << owner->getName() << std::endl;
+            player->payRent(*owner, rent);
+        }
+    } else {
+        // Offer player the option to buy the utility
+        std::cout << player->getName() << ", do you want to buy " << getName() << "? (Price: $" << getPrice() << ")\n";
+        if (player->getMoney() >= getPrice()) {
+            player->buyProperty(shared_from_this());
+            setOwner(player);  // Set the owner after purchase
+            std::cout << player->getName() << " has bought " << getName() << "!\n";
         } else {
-            // Player can buy the utility
-            player->offerToBuy(std::make_shared<UtilityTile>(*this));
+            std::cout << player->getName() << " doesn't have enough money to buy " << getName() << ".\n";
         }
     }
+}
+
 };
 
 

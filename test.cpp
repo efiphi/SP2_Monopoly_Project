@@ -101,7 +101,7 @@ TEST_CASE("StreetTile class tests") {
     }
 }
 
-TEST_CASE("Rent payment") {
+TEST_CASE("Railroad Rent payment") {
     auto player1 = std::make_shared<Player>("Alice", 1500);
     auto player2 = std::make_shared<Player>("Bob", 1500);
     Game game({player1, player2});
@@ -170,20 +170,21 @@ TEST_CASE("Property buying") {
 
    
 
-    // Mocked dice to land on Sydney
-    game.setDice(std::make_shared<MockDice>(5, 4));  // Roll to land on Connecticut Ave
+    // Mocked dice to land on St. Charles Place
+    game.setDice(std::make_shared<MockDice>(5, 6));  // Roll to land on St. Charles Place
     game.playTurn();
 
-    CHECK(player1->getMoney() == 1380);  // Money reduced after buying property
-    CHECK(player1->getPosition() == 9);  // Landed on tile 9
-    CHECK(game.getTile(9)->getOwner() == player1);  // Player 1 owns the tile
+    CHECK(player1->getMoney() == 1360);  // Money reduced after buying property
+    CHECK(player1->getPosition() == 11);  // Landed on tile 9
+    CHECK(game.getTile(11)->getOwner() == player1);  // Player 1 owns the tile
 }
 
 
 
 TEST_CASE("Go to Jail") {
     auto player1 = std::make_shared<Player>("Alice", 1500);
-    Game game({player1});
+    auto player2 = std::make_shared<Player>("Bob", 1500);
+    Game game({player1, player2});
 
     // Manually set player position to tile 25 (near jail)
     player1->setPosition(25);
@@ -213,6 +214,45 @@ TEST_CASE("Player bankruptcy") {
     
     CHECK(player1->isBankrupt() == true);  // Alice should be bankrupt
     CHECK(game.checkForWinner() == true);  // Bob wins the game
+}
+
+
+TEST_CASE("UtilityTile rent calculation") {
+    auto player6 = std::make_shared<Player>("Alice", 1500);
+    auto player7 = std::make_shared<Player>("Bob", 1500);
+    Game game({player6, player7});
+
+    game.setDice(std::make_shared<MockDice>(5, 7));  // Mocking dice roll
+    game.playTurn();  // Player 1 buys Utility
+
+    CHECK(game.getTile(12)->getOwner() == player6);
+
+    game.setDice(std::make_shared<MockDice>(8, 4));  // Player 2 lands on Utility
+    game.playTurn();  // Player 2 pays rent
+
+    CHECK(player6->getMoney() == 1398);  // Rent = 4 * dice roll. Alice paid 150 for the utility, and get paid 48 from Bob
+    CHECK(player7->getMoney() == 1452);  // Bob paid 48 to Alice
+}
+
+
+TEST_CASE("Prevent property re-buying") {
+    SUBCASE("No re-buy after property is bought") {
+        auto player4 = std::make_shared<Player>("Alice", 1500);
+        auto player5 = std::make_shared<Player>("Bob", 1500);
+        Game game1({player4, player5});
+
+        // Alice buys St. James Place (position 16)
+        game1.setDice(std::make_shared<MockDice>(10, 6));  
+        game1.playTurn();
+        CHECK(game1.getTile(16)->getOwner() == player4); // Alice pays 180 to buy the street.
+
+        // Bob lands on St. James Place and pays rent
+        game1.setDice(std::make_shared<MockDice>(9, 7));  
+        game1.playTurn();
+        CHECK(game1.getTile(16)->getOwner() == player4);  // Ownership remains Alice's
+        CHECK(player5->getMoney() == 1486);  // Bob pays 14 rent to Alice
+        CHECK(player4->getMoney() == 1334);  // Alice receives rent 14
+    }
 }
 
 // Test cases for Board class

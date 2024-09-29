@@ -6,6 +6,10 @@
 void Game::playTurn() {
     if (players.empty()) return; // Safety check in case of no players
 
+    if (checkForWinner()) {
+        return;  // End the game if there's a winner
+    }
+
     std::shared_ptr<Player> currentPlayer = players[currentPlayerIndex];
 
     if (currentPlayer->isBankrupt()) {
@@ -23,6 +27,8 @@ void Game::playTurn() {
 
     // Log the dice roll result
     std::cout << "Player " << currentPlayer->getName() << " rolled " << diceRoll.first << " and " << diceRoll.second << std::endl;
+
+    currentPlayer->setLastDiceRoll(totalSteps);
 
     // Check for doubles
     if (dice->isDouble(diceRoll)) {
@@ -71,9 +77,7 @@ void Game::playTurn() {
     }
 
     // Check for game winner at the end of the turn
-    if (checkForWinner()) {
-        return;  // End the game if there's a winner
-    }
+   
 }
 // Proceed to the next player
 void Game::nextPlayer() {
