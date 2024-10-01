@@ -6,6 +6,7 @@
 
 // Forward declare Player to avoid circular dependency
 class Player;
+class Game;
 
 class Tile : public std::enable_shared_from_this<Tile> {
 protected:
@@ -23,7 +24,7 @@ public:
     void setOwner(std::shared_ptr<Player> newOwner) { owner = newOwner; }
     std::shared_ptr<Player> getOwner() const {return owner; }
 
-    virtual void onLand(std::shared_ptr<Player> player) = 0; // Pure virtual function
+    virtual void onLand(std::shared_ptr<Player> player, Game& game) = 0; // Pure virtual function
 
     virtual ~Tile() = default; //Destructor
 

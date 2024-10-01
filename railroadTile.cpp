@@ -2,7 +2,7 @@
 #include "player.hpp"
 #include <iostream>
 
-void RailroadTile::onLand(std::shared_ptr<Player> player) {
+void RailroadTile::onLand(std::shared_ptr<Player> player, Game& game) {
     if (owner == nullptr) {
         // Player can buy the railroad
         std::cout << player->getName() << ", do you want to buy " << getName() << "? (Price: $" << price << ")\n";

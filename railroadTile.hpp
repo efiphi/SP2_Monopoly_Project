@@ -37,7 +37,7 @@ public:
     }
 
     // Define what happens when a player lands on this railroad
-    void onLand(std::shared_ptr<Player> player) override;
+    void onLand(std::shared_ptr<Player> player, Game& game) override;
 };
 
 #endif // RAILROAD_TILE_HPP

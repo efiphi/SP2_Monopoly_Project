@@ -22,6 +22,7 @@ public:
         return instance;
     }
 
+
     // Delete copy constructor and assignment to prevent duplication
     Board(const Board&) = delete;
     void operator=(const Board&) = delete;

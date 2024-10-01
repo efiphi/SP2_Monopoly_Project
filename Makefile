@@ -14,10 +14,10 @@ TARGET = monopoly_game
 TEST_TARGET = test_game
 
 # Source files
-SRCS = main.cpp game.cpp streetTile.cpp railroadTile.cpp player.cpp board.cpp
+SRCS = main.cpp game.cpp streetTile.cpp railroadTile.cpp player.cpp board.cpp cards.cpp
 
-# Test source files (replace test.cpp with your actual test files)
-TEST_SRCS = test.cpp game.cpp streetTile.cpp railroadTile.cpp player.cpp board.cpp
+# Test source files
+TEST_SRCS = test.cpp game.cpp streetTile.cpp railroadTile.cpp player.cpp board.cpp cards.cpp
 
 # Object files
 OBJS = $(SRCS:.cpp=.o)
@@ -46,7 +46,7 @@ test: $(TEST_TARGET)
 
 # Rule to clean the build directory
 clean:
-	rm -f $(OBJS) $(TEST_OBJS) $(TARGET) $(TEST_TARGET)
+	rm -f *.o $(TARGET) $(TEST_TARGET)
 
 # Phony target to prevent issues with file names matching target names
 .PHONY: all clean test

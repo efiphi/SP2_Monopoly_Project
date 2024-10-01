@@ -3,6 +3,7 @@
 
 #include "tile.hpp"
 #include "player.hpp"
+#include "cards.hpp"
 #include <vector>
 #include <cstdlib>
 
@@ -12,9 +13,10 @@ public:
     SpecialTile(const std::string& name)
         : Tile(name, "Special") {}
 
-    void onLand(std::shared_ptr<Player> player) override {
+    void onLand(std::shared_ptr<Player> player, Game &game) override {
         // Default behavior, can be overridden by subclasses
     }
+    
 };
 
 class UtilityTile : public Tile {
@@ -36,7 +38,7 @@ public:
     }
 
     // Overriding the onLand method
-    void onLand(std::shared_ptr<Player> player) override {
+    void onLand(std::shared_ptr<Player> player, Game& game) override {
     if (isOccupied()) {
         // Check if player is not the owner
         if (player != owner) {
@@ -66,49 +68,45 @@ public:
 
 class ChanceTile : public SpecialTile {
 private:
-    std::vector<std::string> chanceCards;
+    std::vector<std::shared_ptr<Card>> chanceCards;  // Store actual cards instead of strings
 
 public:
     ChanceTile(const std::string& name)
         : SpecialTile(name) {
-        chanceCards = {
-            "Get out of jail free card",
-            "Advance to Go (Collect $200)",
-            "Pay a $50 fine",
-            "Go back 3 spaces",
-            "Go directly to jail (do not pass Go, do not collect $200)",
-            "Collect $150 from all players"
-        };
+        // Initialize Chance cards
+        chanceCards.push_back(std::make_shared<AdvanceToGoCard>());
+        chanceCards.push_back(std::make_shared<GoToJailCard>());
+        chanceCards.push_back(std::make_shared<TripToReadingRailroadCard>());
+        chanceCards.push_back(std::make_shared<GeneralRepairsCard>());
+        chanceCards.push_back(std::make_shared<GetOutOfJailFreeCard>());
+        chanceCards.push_back(std::make_shared<AdvanceToNearestUtilityCard>());
+        chanceCards.push_back(std::make_shared<AdvanceToNearestRailroadCard>());
     }
 
-    void onLand(std::shared_ptr<Player> player) override {
+    void onLand(std::shared_ptr<Player> player, Game& game) override {
         int randomIndex = std::rand() % chanceCards.size();
-        std::string drawnCard = chanceCards[randomIndex];
-        player->receiveChanceCard(drawnCard);  // Assuming this method exists in Player
+        player->handleChanceCard(chanceCards[randomIndex], game);
     }
 };
 
 class CommunityChestTile : public SpecialTile {
 private:
-    std::vector<std::string> communityChestCards;
+    std::vector<std::shared_ptr<Card>> communityChestCards;
 
 public:
     CommunityChestTile(const std::string& name)
         : SpecialTile(name) {
-        communityChestCards = {
-            "Collect $200",
-            "Pay hospital fees of $100",
-            "Go directly to jail",
-            "Receive $50 as a birthday gift",
-            "Pay school fees of $150",
-            "Collect $10 from each player"
-        };
+        // Initialize Community Chest cards
+        communityChestCards.push_back(std::make_shared<AdvanceToGoCard>());
+        communityChestCards.push_back(std::make_shared<GeneralRepairsCard>());
+        communityChestCards.push_back(std::make_shared<GetOutOfJailFreeCard>());
+        communityChestCards.push_back(std::make_shared<GeneralRepairsCard>());
+        communityChestCards.push_back(std::make_shared<GeneralRepairsCard>());
     }
 
-    void onLand(std::shared_ptr<Player> player) override {
+    void onLand(std::shared_ptr<Player> player, Game& game) override {
         int randomIndex = std::rand() % communityChestCards.size();
-        std::string drawnCard = communityChestCards[randomIndex];
-        player->receiveCommunityChestCard(drawnCard);  // Placeholder for card logic
+        player->handleCommunityChestCard(communityChestCards[randomIndex], game);
     }
 };
 
@@ -122,7 +120,7 @@ public:
     TaxTile(const std::string& name)
         : SpecialTile(name) {}
 
-    void onLand(std::shared_ptr<Player> player) override {
+    void onLand(std::shared_ptr<Player> player, Game& game) override {
         player->payTax(taxAmount);  // Assuming this method exists in Player
     }
 };
@@ -133,7 +131,7 @@ public:
     FreeParkingTile(const std::string& name)
         : SpecialTile(name) {}
 
-    void onLand(std::shared_ptr<Player> player) override {
+    void onLand(std::shared_ptr<Player> player, Game& game) override {
         // Nothing happens, player just rests here
     }
 };
@@ -144,7 +142,7 @@ public:
     GoToJailTile(const std::string& name)
         : SpecialTile(name) {}
 
-    void onLand(std::shared_ptr<Player> player) override {
+    void onLand(std::shared_ptr<Player> player, Game& game) override {
         player->goToJail();  // Assuming this method exists in Player
     }
 };
@@ -155,7 +153,7 @@ public:
     StartTile(const std::string& name)
         : SpecialTile(name) {}
 
-    void onLand(std::shared_ptr<Player> player) override {
+    void onLand(std::shared_ptr<Player> player, Game& game) override {
         player->collectFromStart(200);  // Assuming this method exists in Player
     }
 };
@@ -166,7 +164,7 @@ public:
     JailTile(const std::string& name)
         : SpecialTile(name) {}
 
-    void onLand(std::shared_ptr<Player> player) override {
+    void onLand(std::shared_ptr<Player> player, Game& game) override {
         if (player->isInJail()) {
             player->handleJailTurn();  // Assuming this method exists in Player
         } else {

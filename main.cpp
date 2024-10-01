@@ -26,7 +26,7 @@ int main() {
     game.getBoard().getTile(6)->setOwner(player2);
     game.getBoard().getTile(11)->setOwner(player3);
     game.getBoard().getTile(15)->setOwner(player4);
-    game.getBoard().getTile(21)->setOwner(player1);
+    game.getBoard().getTile(21)->setOwner(player4);
     game.getBoard().getTile(39)->setOwner(player2);
     game.getBoard().getTile(35)->setOwner(player1);
 

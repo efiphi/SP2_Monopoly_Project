@@ -91,7 +91,7 @@ public:
     }
 
     // Define what happens when a player lands on this street
-    void onLand(std::shared_ptr<Player> player) override;
+    void onLand(std::shared_ptr<Player> player, Game& game) override;
 };
 
 #endif // STREET_TILE_HPP

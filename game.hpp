@@ -57,6 +57,7 @@ public:
     std::shared_ptr<Tile> getTile(int index) const {
         return board.getTile(index);  // Delegate to the Board class's getTile
     }
+    
 
     sf::Vector2f getTilePosition(int tileIndex, double tileSize, int cornerTileSize);
     

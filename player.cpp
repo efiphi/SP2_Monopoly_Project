@@ -1,5 +1,7 @@
 #include "player.hpp"
 #include "tile.hpp"
+#include "cards.hpp"
+#include "game.hpp"
 #include <iostream>
 #include <memory>
 
@@ -40,4 +42,14 @@ void Player::offerToBuy(std::shared_ptr<Tile> property) {
             std::cout << name << " doesn't have enough money to buy " << property->getName() << ".\n";
         }
     }
+}
+
+void Player::handleChanceCard(std::shared_ptr<Card> card, Game& game) {
+    std::cout << name << " has drawn a Chance card: " << card->getDescription() << "\n";
+    card->execute(shared_from_this(), game);  // Execute the effect of the Chance card
+}
+
+void Player::handleCommunityChestCard(std::shared_ptr<Card> card, Game& game) {
+    std::cout << name << " has drawn a Community Chest card: " << card->getDescription() << "\n";
+    card->execute(shared_from_this(), game);  // Execute the effect of the Community Chest card
 }

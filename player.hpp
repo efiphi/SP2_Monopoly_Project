@@ -10,8 +10,9 @@
 #include "streetTile.hpp"
 #include "railroadTile.hpp"
 
-// Forward declaration of Tile class to avoid circular dependency
-class Tile;
+// Forward declaration of classes to avoid circular dependencies
+class Card;
+class Game;
 
 class Player : public std::enable_shared_from_this<Player> {
 private:
@@ -22,6 +23,8 @@ private:
     std::vector<std::shared_ptr<Tile>> ownedProperties;  // Properties owned by the player
     int lastDiceRoll;                        // Last dice roll result
     int numberOfUtilities;  
+    int numberOfRailroads;                    // Track number of railroads owned
+    bool hasGetOutOfJailCard;
     
 
 public:
@@ -31,7 +34,7 @@ public:
 
     // Constructor
     Player(const std::string& name, int startingMoney = 1500)
-        : name(name), money(startingMoney), location(0), inJail(false), jailTurns(0), lastDiceRoll(0), numberOfUtilities(0) {}
+        : name(name), money(startingMoney), location(0), inJail(false), jailTurns(0), lastDiceRoll(0), numberOfUtilities(0), numberOfRailroads(0), hasGetOutOfJailCard(false) {}
     
     Player(sf::Color c, int startLocation = 0)
         : color(c), location(startLocation) {}
@@ -136,22 +139,42 @@ void declareBankruptcy(Player& owner) {
     money = 0;
 }
 
+ int getHouseCount() const {
+        int houseCount = 0;
+        for (const auto& property : ownedProperties) {
+            if (auto street = std::dynamic_pointer_cast<StreetTile>(property)) {
+                houseCount += street->getHouseCount();
+            }
+        }
+        return houseCount;
+    }
+
+    int getHotelCount() const {
+    int hotelCount = 0;
+    for (const auto& property : ownedProperties) {
+        auto street = std::dynamic_pointer_cast<StreetTile>(property);
+        if (street && street->isHotelBuilt()) {
+            hotelCount++;
+        }
+    }
+    return hotelCount;
+}
 
 
+    void receiveGetOutOfJailCard() { hasGetOutOfJailCard = true; }
+    bool hasGetOutOfJailFreeCard() const { return hasGetOutOfJailCard; }
+    void useGetOutOfJailCard() { hasGetOutOfJailCard = false; }
+
+    int getNumberOfRailroads() const { return numberOfRailroads; }
+    void incrementRailroadsOwned() { ++numberOfRailroads; }
 
     // Pay tax
     void payTax(int taxAmount) {
         adjustMoney(-taxAmount);  // Deduct tax from player
     }
 
-    // Handle Chance/Community Chest cards
-    void receiveChanceCard(const std::string& card) {
-        std::cout << "Player " << name << " received a Chance card: " << card << std::endl;
-    }
-
-    void receiveCommunityChestCard(const std::string& card) {
-        std::cout << "Player " << name << " received a Community Chest card: " << card << std::endl;
-    }
+    void handleChanceCard(std::shared_ptr<Card> card, Game& game);
+    void handleCommunityChestCard(std::shared_ptr<Card> card, Game& game);
 
     // Display player info
     void displayPlayerInfo() const {

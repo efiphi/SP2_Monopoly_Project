@@ -57,7 +57,7 @@ void Game::playTurn() {
 
     // Interact with the tile the player landed on
     auto tile = board.getTile(currentPlayer->getPosition());
-    tile->onLand(currentPlayer);
+    tile->onLand(currentPlayer, *this);
 
     // Handle bankruptcy after landing on a tile
     if (currentPlayer->isBankrupt()) {
@@ -107,7 +107,7 @@ void Game::addTile(std::shared_ptr<Tile> tile, const sf::Vector2f& position) {
 
 void Game::drawStar(sf::RenderWindow &window, const sf::Vector2f &position, int tileIndex, sf::Color color) {
     // Specify which tile indices correspond to special tiles where no stars should be drawn
-    std::vector<int> noStarTiles = {0, 2, 7, 10, 17, 20, 22, 30, 33, 36};  // Indices for Go, Chance, Community Chest, Jail, etc.
+    std::vector<int> noStarTiles = {0, 2, 4, 7, 10, 17, 20, 22, 30, 33, 36, 38};  // Indices for Go, Chance, Community Chest, Jail, etc.
 
     // Check if the current tile index is one of the special tiles
     if (std::find(noStarTiles.begin(), noStarTiles.end(), tileIndex) != noStarTiles.end()) {

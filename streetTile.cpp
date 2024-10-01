@@ -2,7 +2,7 @@
 #include "player.hpp"
 #include <iostream>
 
-void StreetTile::onLand(std::shared_ptr<Player> player) {
+void StreetTile::onLand(std::shared_ptr<Player> player, Game& game) {
     if (owner == nullptr) {
         // Player can buy the property
         std::cout << player->getName() << ", do you want to buy " << getName() << "? (Price: $" << basePrice << ")\n";

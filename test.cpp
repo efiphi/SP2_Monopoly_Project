@@ -7,6 +7,7 @@
 #include "board.hpp"
 #include "game.hpp"
 #include "dice.hpp"
+#include "cards.hpp"
 #include <SFML/System.hpp>
 
 // Test cases for Player class
@@ -108,10 +109,11 @@ TEST_CASE("Railroad Rent payment") {
 
     CHECK(player1->getMoney() == 1500);  // Alice receives rent
     CHECK(player2->getMoney() == 1500); 
-
+    player1->setPosition(10);
     game.setDice(std::make_shared<MockDice>(3, 2));  // Alice buys Reading Railroad(200$)
     game.playTurn();
 
+    player2->setPosition(10);   
     game.setDice(std::make_shared<MockDice>(3, 2));  // Bob lands on Reading Railroad(pay 50 to Alice)
     game.playTurn();
 
@@ -254,6 +256,150 @@ TEST_CASE("Prevent property re-buying") {
         CHECK(player4->getMoney() == 1334);  // Alice receives rent 14
     }
 }
+
+TEST_CASE("Player attempts to buy property with insufficient funds") {
+    auto player = std::make_shared<Player>("Bob", 50);  // Player with only 50$
+    auto player2 = std::make_shared<Player>("Alice", 1500);
+    Game game({player, player2});
+
+    // Set dice for Bob to land on Mediterranean Avenue (position 1, cost 60$)
+    game.setDice(std::make_shared<MockDice>(10, 9));  // Lands on Mediterranean Ave
+    game.playTurn();
+    CHECK(game.getTile(1)->getOwner() == nullptr);  // Property should remain unowned
+    CHECK(player->getMoney() == 50);  // Bob's money remains 50 since he can't afford the property
+}
+
+TEST_CASE("Chance Cards: Take a Trip to Reading Railroad") {
+    auto player = std::make_shared<Player>("Player 1", 1500);
+    auto owner = std::make_shared<Player>("Owner", 1500);
+    Game game({player, owner});
+    Board& board = Board::getInstance();
+
+    auto readingRailroad = std::dynamic_pointer_cast<RailroadTile>(board.getTile(5));
+
+    SUBCASE("Landing on unowned Reading Railroad") {
+        player->setPosition(2);  // Start at position 2
+        readingRailroad->setOwner(nullptr);
+        auto card = std::make_shared<TripToReadingRailroadCard>();
+        player->handleChanceCard(card, game);
+
+        CHECK(player->getPosition() == 5);  // Moves to Reading Railroad
+        CHECK(player->getMoney() == 1300);  // Deducted $200 for the purchase
+    }
+
+    SUBCASE("Landing on owned Reading Railroad") {
+        player->setPosition(2);
+        readingRailroad->setOwner(owner);  // Set owner
+        auto card = std::make_shared<TripToReadingRailroadCard>();
+        player->handleChanceCard(card, game);
+
+        CHECK(player->getPosition() == 5);   // Correct position
+        CHECK(player->getMoney() == 1450);   // Paid $50 rent
+        CHECK(owner->getMoney() == 1550);    // Owner received $50
+    }
+}
+
+
+TEST_CASE("Chance Cards: Advance to Nearest Utility") {
+    auto player10 = std::make_shared<Player>("Player 1", 1500);
+    auto owner10 = std::make_shared<Player>("Owner", 1500);
+    Game game10({player10, owner10});
+    Board& board = Board::getInstance();
+
+    auto electricCompany = std::dynamic_pointer_cast<UtilityTile>(board.getTile(12));
+    auto waterWorks = std::dynamic_pointer_cast<UtilityTile>(board.getTile(28));
+
+    SUBCASE("Moving to nearest unowned utility") {
+        player10->setPosition(10);
+        electricCompany->setOwner(nullptr);
+        auto card = std::make_shared<AdvanceToNearestUtilityCard>();
+        player10->handleChanceCard(card, game10);
+
+        CHECK(player10->getPosition() == 12);  // Correct position
+        CHECK(player10->getMoney() == 1350);  // Deducted $150 for the purchase
+    }
+
+    SUBCASE("Landing on owned utility and paying rent") {
+        player10->setPosition(22);
+        waterWorks->setOwner(owner10);  // Set owner
+        auto card = std::make_shared<AdvanceToNearestUtilityCard>();
+        game10.setDice(std::make_shared<MockDice>(3, 4));  // Set dice roll
+        player10->handleChanceCard(card, game10);
+
+        CHECK(player10->getPosition() == 28);  // Correct position
+       
+    }
+}
+
+TEST_CASE("Chance Cards: Advance to Nearest Railroad") {
+    auto player = std::make_shared<Player>("Player 1", 1500);
+    auto owner = std::make_shared<Player>("Owner", 1500);
+    Game game({player, owner});
+    Board& board = Board::getInstance();
+
+    auto readingRailroad = std::dynamic_pointer_cast<RailroadTile>(board.getTile(5));
+    auto pennsylvaniaRailroad = std::dynamic_pointer_cast<RailroadTile>(board.getTile(15));
+
+    SUBCASE("Moving to nearest unowned railroad") {
+        player->setPosition(12);
+        readingRailroad->setOwner(nullptr);
+        auto card = std::make_shared<AdvanceToNearestRailroadCard>();
+        player->handleChanceCard(card, game);
+
+        CHECK(player->getPosition() == 15);
+        CHECK(player->getMoney() == 1400);  // Deducted $200 for purchase
+    }
+
+    SUBCASE("Landing on owned railroad and paying rent") {
+        player->setPosition(8);
+        pennsylvaniaRailroad->setOwner(owner);
+        auto card = std::make_shared<AdvanceToNearestRailroadCard>();
+        player->handleChanceCard(card, game);
+
+        CHECK(player->getPosition() == 15);  // Correct position
+        CHECK(player->getMoney() == 1400);   // Paid $100 rent
+        CHECK(owner->getMoney() == 1600);    // Owner received $100
+    }
+}
+
+
+TEST_CASE("Community Chest Cards: Get Out of Jail Free Card") {
+    auto player = std::make_shared<Player>("Player 1", 1500);
+    Game game({player});
+    auto card = std::make_shared<GetOutOfJailFreeCard>();
+
+    player->handleCommunityChestCard(card, game);
+    CHECK(player->hasGetOutOfJailFreeCard() == true);
+}
+
+TEST_CASE("Community Chest Cards: Advance to Go") {
+    auto player = std::make_shared<Player>("Player 1", 1500);
+    Game game({player});
+    Board& board = Board::getInstance();
+
+    auto card = std::make_shared<AdvanceToGoCard>();
+    player->setPosition(15);  // Set player far from Go
+    player->handleCommunityChestCard(card, game);
+
+    CHECK(player->getPosition() == 0);  // Moves to Go
+    CHECK(player->getMoney() == 1700);  // Collected $200
+}
+
+
+
+TEST_CASE("Community Chest Cards: Go to Jail") {
+    auto player = std::make_shared<Player>("Player 1", 1500);
+    Game game({player});
+    Board& board = Board::getInstance();
+
+    auto card = std::make_shared<GoToJailCard>();
+    player->handleCommunityChestCard(card, game);
+
+    CHECK(player->getPosition() == 10);  // Jail position is at 10
+    CHECK(player->isInJail() == true);
+}
+
+
 
 // Test cases for Board class
 TEST_CASE("Board class tests") {    
