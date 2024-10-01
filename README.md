@@ -136,8 +136,8 @@ Represents a card in the game (either Chance or Community Chest).
  ## Graphical Representation
 When running the code, a window is displayed using SFML. The board is rendered, showing all the tiles and player tokens on their current positions. You can see the following visual elements:
 
-    Player Locations: Displayed as colored tokens corresponding to each player.
-    Property Ownership: Shown using markers for owned or free tiles.
+    Player Locations: Displayed as colored circles corresponding to each player.
+    Property Ownership: Shown colored stars for owned or free tiles.
     Special Tiles: Rendered distinctly for Chance, Community Chest, and other unique tiles.
     
 ## How to Run
