@@ -106,7 +106,7 @@ Represents the entire game board.
       removeTile(int index): Removes a tile from the board.
       getTileCount(): Returns the total number of tiles on the board.
       
-### Card
+### Cards
 Represents a card in the game (either Chance or Community Chest).
 
     Methods:
