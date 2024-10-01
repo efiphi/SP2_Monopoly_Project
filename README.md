@@ -78,19 +78,30 @@ A class derived from Tile representing utilities in the game.
 ### Game
 Manages the entire game state, including players, turns, and game rules.
 
-    Attributes:
+       Attributes:
 
-      players: List of all players.
-      currentPlayerIndex: Index of the player whose turn it is.
-      board: The game board, which holds all the tiles.
-      Methods:
-      
-      Game(const std::vector<std::shared_ptr<Player>>& playerList): Initializes the game with a list of players.
-      playTurn(): Executes a single turn for the current player.
-      checkForWinner(): Checks if any player has won the game.
-      checkBankruptcy(): Removes bankrupt players from the game.
-      getCurrentPlayer(): Returns the current player.
-      advanceTurn(): Advances the turn to the next player.
+        players: List of all players.
+        currentPlayerIndex: Index of the player whose turn it is.
+        board: The game board, which holds all the tiles.
+        doubleCount: To track consecutive doubles.
+        dice: Dice object used for rolling.
+        
+    Methods:
+        
+        Game(const std::vector<std::shared_ptr<Player>>& playerList): Initializes the game with a list of players.
+        playTurn(): Executes a single turn for the current player.
+        checkForWinner(): Checks if any player has won the game.
+        checkBankruptcy(): Removes bankrupt players from the game.
+        getCurrentPlayer(): Returns the current player.
+        getTile(int index): Returns a tile at a specific index.
+        drawBoard(sf::RenderWindow& window): Draws the entire board.
+        drawPlayers(sf::RenderWindow& window, const std::vector<std::shared_ptr<Player>>& players): Draws player tokens on the board.
+        drawStar(sf::RenderWindow& window, const sf::Vector2f& position, int tileIndex, sf::Color color): Draws markers for tile occupation.
+        addTile(std::shared_ptr<Tile> tile, const sf::Vector2f& position): Adds a new tile to the board.
+        initializeBoard(): Initializes the board with all the required tiles.
+        setDice(std::shared_ptr<Dice> customDice): Sets a custom dice (useful for testing).
+        getDiceRoll(): Returns the most recent dice roll.
+        isDouble(const std::pair<int, int>& diceRoll): Checks if a roll is a double.
     
 ### Board
 Represents the entire game board.
@@ -121,6 +132,13 @@ Represents a card in the game (either Chance or Community Chest).
     <memory>: For smart pointers.
     <SFML/Graphics.hpp>: For graphical rendering.
     <doctest.h>: For unit testing.
+
+ ## Graphical Representation
+When running the code, a window is displayed using SFML. The board is rendered, showing all the tiles and player tokens on their current positions. You can see the following visual elements:
+
+    Player Locations: Displayed as colored tokens corresponding to each player.
+    Property Ownership: Shown using markers for owned or free tiles.
+    Special Tiles: Rendered distinctly for Chance, Community Chest, and other unique tiles.
     
 ## How to Run
 Clone the repository:
