@@ -53,3 +53,14 @@ Board::Board() {
     addTile(std::make_shared<TaxTile>("Luxury Tax"), {750, 600});                // 38
     addTile(std::make_shared<StreetTile>("Boardwalk", "Blue", 400, 50), {750, 655}); // 39
 }
+
+std::vector<StreetTile*> Board::getColorGroupProperties(const std::string& colorGroup) const {
+    std::vector<StreetTile*> groupProperties;
+    for (const auto& tile : tiles) {
+        auto streetTile = std::dynamic_pointer_cast<StreetTile>(tile);
+        if (streetTile && streetTile->getColorGroup() == colorGroup) {
+            groupProperties.push_back(streetTile.get());
+        }
+    }
+    return groupProperties;
+}

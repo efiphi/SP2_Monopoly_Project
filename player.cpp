@@ -44,6 +44,7 @@ void Player::offerToBuy(std::shared_ptr<Tile> property) {
     }
 }
 
+
 void Player::handleChanceCard(std::shared_ptr<Card> card, Game& game) {
     std::cout << name << " has drawn a Chance card: " << card->getDescription() << "\n";
     card->execute(shared_from_this(), game);  // Execute the effect of the Chance card

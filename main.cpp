@@ -1,62 +1,57 @@
-#include <SFML/Graphics.hpp>
+#include <iostream>
 #include <memory>
-#include <vector>
 #include "game.hpp"
-#include "board.hpp"
+#include "player.hpp"
 
-// Assuming you have the Player class and the Game class with drawPlayers implemented
 int main() {
-    // Create a window
-    sf::RenderWindow window(sf::VideoMode(800, 800), "Monopoly Board Test");
+    std::cout << "Welcome to the Interactive Monopoly Game!\n";
 
-    Board& board = Board::getInstance();
+    // Create players
+    auto player1 = std::make_shared<Player>("Alice", 1500);
+    auto player2 = std::make_shared<Player>("Bob", 1500);
+    auto player3 = std::make_shared<Player>("Mark", 1500);
+    Game game({player1, player2, player3});
 
-    // Create test players
-    std::vector<std::shared_ptr<Player>> players;
+    game.initializeBoard();  // Initialize the board with all tiles
 
-    Game game(players);
-    
-    // Adding 4 players with different colors and positions
-    auto player1 = std::make_shared<Player>(sf::Color::Red, 9);
-    auto player2 = std::make_shared<Player>(sf::Color::Blue, 23);
-    auto player3 = std::make_shared<Player>(sf::Color::Green, 15);
-    auto player4 = std::make_shared<Player>(sf::Color::Yellow, 39);
-    
-    game.getBoard().getTile(1)->setOwner(player1);
-    game.getBoard().getTile(6)->setOwner(player2);
-    game.getBoard().getTile(11)->setOwner(player3);
-    game.getBoard().getTile(15)->setOwner(player4);
-    game.getBoard().getTile(21)->setOwner(player4);
-    game.getBoard().getTile(39)->setOwner(player2);
-    game.getBoard().getTile(35)->setOwner(player1);
+    bool gameFinished = false;
+    bool exitFlag = false;  // Global flag to track if the game should exit
 
-    
-    players.push_back(player1);
-    players.push_back(player2);
-    players.push_back(player3);
-    players.push_back(player4);
+    while (!gameFinished && !exitFlag) {
+        // Main game loop: Iterate through players and offer choices
+        auto currentPlayer = game.getCurrentPlayer();
+        bool endTurn = false;
 
+        std::cout << "\nIt's " << currentPlayer->getName() << "'s turn.\n";
 
-    // Game loop
-    while (window.isOpen()) {
-        sf::Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
-                window.close();
+        while (!endTurn && !exitFlag) {
+            // Display options for the current player
+            game.displayPlayerOptions();
+            int choice;
+            std::cin >> choice;
+
+            // Handle the player's choice
+            game.handlePlayerChoice(choice, endTurn, exitFlag);
+
+            // Check if the player chose to exit the game
+            if (exitFlag) {
+                std::cout << "Exiting the game...\n";
+                gameFinished = true;
+                break;
+            }
+
+            // If a player is bankrupt or wins, end the game
+            if (game.checkForWinner() || currentPlayer->isBankrupt()) {
+                gameFinished = true;
+                break;
+            }
         }
 
-        // Clear the window
-        window.clear(sf::Color::White);
-
-        // Draw the board
-        game.drawBoard(window);
-
-        // Draw the players on the board
-        game.drawPlayers(window, players);
-
-        // Display the window
-        window.display();
+        if (!exitFlag) {
+            game.nextPlayer();  // Move to the next player's turn only if not exiting
+        }
     }
 
+    std::cout << "Game Over! Thanks for playing.\n";
     return 0;
 }

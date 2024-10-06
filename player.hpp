@@ -25,6 +25,7 @@ private:
     int numberOfUtilities;  
     int numberOfRailroads;                    // Track number of railroads owned
     bool hasGetOutOfJailCard;
+    sf::Color playerColor;
     
 
 public:
@@ -57,6 +58,28 @@ public:
     // Get player's current position on the board
     int getPosition() const { return location; }
     void setPosition(int newLocation) { location = newLocation;}
+
+    void setColor(const sf::Color& c) {
+    color = c;
+    }
+    
+    // Getter for player color (optional, for drawing purposes)
+    sf::Color getPlayerColor() const {
+        return playerColor;
+    }
+
+    const std::vector<std::shared_ptr<Tile>>& getProperties() const {
+    return ownedProperties;
+    }
+
+
+    bool ownsProperty(const std::shared_ptr<Tile>& property) const {
+    return std::find(ownedProperties.begin(), ownedProperties.end(), property) != ownedProperties.end();
+    }
+
+
+
+
 
     // Move the player by a given number of positions
     void move(int diceRoll) {

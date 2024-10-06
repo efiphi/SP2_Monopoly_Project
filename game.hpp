@@ -21,8 +21,17 @@ private:
 
 public:
     // Constructor
-    Game(const std::vector<std::shared_ptr<Player>>& playerList)
-        : board(Board::getInstance()), players(playerList), currentPlayerIndex(0), doubleCount(0), dice(std::make_shared<Dice>()) {}
+   Game(const std::vector<std::shared_ptr<Player>>& playerList)
+    : board(Board::getInstance()), players(playerList), currentPlayerIndex(0), doubleCount(0), dice(std::make_shared<Dice>()) {
+    // Available player colors (add more as needed)
+    std::vector<sf::Color> playerColors = {sf::Color::Red, sf::Color::Blue, sf::Color::Green, sf::Color::Yellow};
+
+    // Assuming players are initialized as follows:
+    for (size_t i = 0; i < players.size(); ++i) {
+        players[i]->setColor(playerColors[i % playerColors.size()]);
+    }
+
+    }
 
     // Play a turn for the current player
     void playTurn();
@@ -60,13 +69,10 @@ public:
     
 
     sf::Vector2f getTilePosition(int tileIndex, double tileSize, int cornerTileSize);
-    
+    void displayBoard();
     void drawPlayers(sf::RenderWindow &window, const std::vector<std::shared_ptr<Player>>& players);
-
     void drawBoard(sf::RenderWindow& window);
-
     void drawStar(sf::RenderWindow &window, const sf::Vector2f &position, int tileIndex, sf::Color color);
-
     void initializeBoard();
 
     // Use shared_ptr to set the Dice
@@ -82,6 +88,12 @@ public:
 
     std::pair<int, int> getDiceRoll() const { return lastDiceRoll; }  // Expose last dice roll
     bool isDouble(const std::pair<int, int>& diceRoll) const { return dice->isDouble(diceRoll); }  // Check for double
+
+    void displayPlayerOptions() const;
+    void handlePlayerChoice(int choice, bool &endTurn, bool &exitFlag);
+    void displayPlayerDetails(const std::shared_ptr<Player>& player) const;
+    void handlePropertyPurchase(const std::shared_ptr<Player>& player, bool isHouse);
+    
 };
 
 #endif // GAME_HPP

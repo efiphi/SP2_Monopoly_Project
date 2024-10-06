@@ -1,6 +1,9 @@
 #include "game.hpp"
+#include "board.hpp"
 #include <iostream>
 #include <algorithm> 
+#include <sstream>
+
 
 // Play a turn for the current player
 void Game::playTurn() {
@@ -95,11 +98,29 @@ bool Game::checkForWinner() {
 
 // Start the game
 void Game::start() {
-    while (true) {
-        playTurn();  // Continuously play turns
-        if (checkForWinner()) break;  // End the game if there's a winner
+    // Create the window for displaying the board
+    sf::RenderWindow window(sf::VideoMode(800, 800), "Monopoly Game Board");
+
+    // Initialize the board and player positions
+    initializeBoard();
+
+    // Main game loop
+    while (window.isOpen()) {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                window.close();
+            }
+        }
+
+        // Clear the window and draw the board and players
+        window.clear(sf::Color::White);
+        drawBoard(window);
+        drawPlayers(window, players);
+        window.display();
     }
 }
+
 
 void Game::addTile(std::shared_ptr<Tile> tile, const sf::Vector2f& position) {
     board.addTile(tile, position);
@@ -305,4 +326,131 @@ void Game::initializeBoard() {
     board.addTile(std::make_shared<StreetTile>("Park Place", "Blue", 350, 35), {750, 540}); // 37
     board.addTile(std::make_shared<TaxTile>("Luxury Tax"), {750, 600});                // 38
     board.addTile(std::make_shared<StreetTile>("Boardwalk", "Blue", 400, 50), {750, 655}); // 39
+}
+
+// Display options for the current player
+void Game::displayPlayerOptions() const {
+    std::cout << "What would you like to do? Enter the corresponding number:\n"
+              << "1. Roll Dice\n"
+              << "2. View Player Details\n"
+              << "3. Buy a House\n"
+              << "4. Buy a Hotel\n"
+              << "5. View Board\n"
+              << "6. End Turn\n"
+              << "7. Exit Game\n";
+}
+
+// Handle the choice made by the player
+void Game::handlePlayerChoice(int choice, bool &endTurn, bool &exitFlag) {
+    std::shared_ptr<Player> currentPlayer = getCurrentPlayer();
+
+    switch (choice) {
+        case 1:  // Roll Dice
+            std::cout << currentPlayer->getName() << " rolls the dice." << std::endl;
+            playTurn();  // Executes the player's turn (moves and actions)
+            break;
+
+        case 2:  // View Player Details
+            displayPlayerDetails(currentPlayer);
+            break;
+
+        case 3:  // Buy a House
+            handlePropertyPurchase(currentPlayer, true);
+            break;
+
+        case 4:  // Buy a Hotel
+            handlePropertyPurchase(currentPlayer, false);
+            break;
+
+        case 5:  // View Board
+            std::cout << "Displaying the current game board...\n";
+            displayBoard();  // Draw the board
+            break;
+
+        case 6:  // End Turn
+            std::cout << currentPlayer->getName() << " ends the turn." << std::endl;
+            nextPlayer();  // Move to the next player
+            endTurn = true;
+            break;
+
+        case 7:  // Exit Game
+           std::cout << "Exiting the game..." << std::endl;
+            exitFlag = true;
+            endTurn = true;
+            break;
+
+        default:
+            std::cout << "Invalid choice. Please enter a valid option." << std::endl;
+            break;
+    }
+    
+}
+
+void Game::displayBoard() {
+    sf::RenderWindow window(sf::VideoMode(800, 800), "Monopoly Game Board");
+
+    // Game loop
+    while (window.isOpen()) {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                window.close();
+            }
+        }
+
+        // Clear the window
+        window.clear(sf::Color::White);
+
+        // Draw the board
+        drawBoard(window);
+
+        // Draw the players on the board
+        drawPlayers(window, players);
+
+        // Display the window
+        window.display();
+    }
+}
+
+
+// Display detailed player information
+void Game::displayPlayerDetails(const std::shared_ptr<Player>& player) const {
+    std::cout << "Player Details for " << player->getName() << ":\n"
+              << "Current Money: $" << player->getMoney() << "\n"
+              << "Current Position: " << player->getPosition() << "\n"
+              << "Properties Owned:\n";
+
+    for (const auto& property : player->getProperties()) {
+        std::cout << " - " << property->getName() << "\n";
+    }
+}
+
+// Handle property purchase (either house or hotel) for a player
+void Game::handlePropertyPurchase(const std::shared_ptr<Player>& player, bool isHouse) {
+    std::cout << "Enter the name of the street where you want to " 
+              << (isHouse ? "buy a house:" : "buy a hotel:") << std::endl;
+    std::string streetName;
+    std::getline(std::cin >> std::ws, streetName);
+
+    auto property = std::dynamic_pointer_cast<StreetTile>(board.findPropertyByName(streetName));
+    if (property && player->ownsProperty(property)) {
+        std::cout << "Attempting to " << (isHouse ? "build a house" : "build a hotel") 
+                  << " on " << property->getName() << "...\n";
+        if (isHouse) {
+            // Ensure player owns all properties in the color group before building
+            if (property->buildHouse(board.getColorGroupProperties(property->getColorGroup()))) {
+                std::cout << "House built successfully on " << property->getName() << "!" << std::endl;
+            } else {
+                std::cout << "Failed to build a house on " << property->getName() << "." << std::endl;
+            }
+        } else {
+            if (property->buildHotel(board.getColorGroupProperties(property->getColorGroup()))) {
+                std::cout << "Hotel built successfully on " << property->getName() << "!" << std::endl;
+            } else {
+                std::cout << "Failed to build a hotel on " << property->getName() << "." << std::endl;
+            }
+        }
+    } else {
+        std::cout << "Street not found or not owned by you." << std::endl;
+    }
 }

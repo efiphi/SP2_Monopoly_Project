@@ -4,8 +4,10 @@
 #include <vector>
 #include <memory>
 #include <iostream>
-#include "tile.hpp"
 #include <SFML/Graphics.hpp>
+#include "tile.hpp"
+#include "streetTile.hpp"
+
 
 class Board {
 private:
@@ -48,6 +50,19 @@ public:
 
     // Get the number of tiles
     int getTileCount() const { return static_cast<int>(tiles.size()); }
+
+    std::vector<StreetTile*> getColorGroupProperties(const std::string& colorGroup) const;
+
+    std::shared_ptr<Tile> findPropertyByName(const std::string& propertyName) const {
+        for (const auto& tile : tiles) {
+            if (tile->getName() == propertyName) {
+                return tile;
+            }
+        }
+        return nullptr;
+    }
+
+
 
     // Get a tile by its position
     std::shared_ptr<Tile> getTile(int position) const {
